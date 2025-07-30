@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorador Interactivo de Casos de Éxito en IIoT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The application is designed as a single-page dashboard with a persistent top navigation to switch between three main views: 'Introducción', 'Plataformas y Casos', and 'Análisis Comparativo'. This structure was chosen to break down the dense report into logical, digestible segments. The core of the app is the 'Plataformas' section, which uses a tabbed-filter interaction model. Users can select a platform (Node-RED, AWS IoT, ThingsBoard) to dynamically view an overview and associated case study cards. This non-linear, user-driven approach is superior to a simple scroll, as it allows students to focus on and compare specific areas of interest, aligning with a postgraduate learning style. Case studies are presented as expandable cards to prevent initial information overload, encouraging exploration. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Market Growth Projection (CAGR 13.34%). Goal: Inform/Impact. Viz: Line Chart. Interaction: Hover for tooltips. Justification: A line chart is the standard and most effective way to show trends over time. Library: Chart.js (Canvas).
+        - Report Info: Key IIoT Benefits. Goal: Inform. Viz: List with Icons. Interaction: Static. Justification: Icons provide quick visual cues for better readability and retention. Method: HTML/Unicode.
+        - Report Info: Case Studies (Problem, Solution, Arch, Results). Goal: Organize/Explore. Viz: Interactive Cards. Interaction: Click to expand/collapse. Justification: This hides complexity initially, making the UI cleaner and encouraging the user to actively engage with the content they are interested in. Method: HTML/JS.
+        - Report Info: Platform Comparison. Goal: Compare. Viz: Styled Table. Interaction: Hover highlights. Justification: A table is the most direct way to compare features across multiple items. Method: HTML/Tailwind CSS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F5F4; /* stone-100 */
+            color: #374151; /* gray-700 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link.active {
+            color: #3B82F6; /* blue-500 */
+            border-bottom-color: #3B82F6;
+        }
+        .platform-tab.active {
+            background-color: #3B82F6; /* blue-500 */
+            color: #FFFFFF;
+        }
+        .case-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .case-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .details-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.7s ease-in-out;
+        }
+        .details-content.open {
+            max-height: 2000px; /* Adjust as needed */
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-gray-800">Explorador IIoT</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#introduccion" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-blue-500 border-b-2 border-transparent">Introducción</a>
+                        <a href="#plataformas" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-blue-500 border-b-2 border-transparent">Plataformas y Casos</a>
+                        <a href="#comparativo" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-blue-500 border-b-2 border-transparent">Análisis Comparativo</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Sección de Introducción -->
+        <section id="introduccion" class="content-section space-y-12">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">El Impacto Estratégico de la IIoT</h2>
+                <p class="mt-4 max-w-3xl mx-auto text-lg text-gray-600">La Internet Industrial de las Cosas (IIoT) es más que tecnología; es una fuerza transformadora que redefine industrias, optimiza operaciones y desbloquea nuevas fuentes de valor. Esta sección explora su definición, beneficios clave y el panorama del mercado.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Crecimiento Proyectado del Mercado IIoT</h3>
+                    <p class="text-gray-600 mb-4">El mercado de la IIoT muestra un crecimiento robusto, con una Tasa de Crecimiento Anual Compuesta (CAGR) esperada del 13.34% entre 2025 y 2029, proyectando alcanzar un valor de $454.89 mil millones para 2029.</p>
+                    <div class="chart-container">
+                        <canvas id="marketGrowthChart"></canvas>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-center text-gray-800">Beneficios Clave de la Adopción</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start bg-white p-4 rounded-lg shadow">
+                            <span class="text-2xl mr-4">🔧</span>
+                            <div>
+                                <h4 class="font-semibold">Mantenimiento Predictivo</h4>
+                                <p class="text-gray-600 text-sm">Anticipa fallas en equipos para reducir tiempos de inactividad y costos de reparación.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start bg-white p-4 rounded-lg shadow">
+                            <span class="text-2xl mr-4">🏆</span>
+                            <div>
+                                <h4 class="font-semibold">Control de Calidad Mejorado</h4>
+                                <p class="text-gray-600 text-sm">Detecta defectos en tiempo real para evitar errores costosos en la producción.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start bg-white p-4 rounded-lg shadow">
+                            <span class="text-2xl mr-4">👷</span>
+                            <div>
+                                <h4 class="font-semibold">Seguridad del Trabajador</h4>
+                                <p class="text-gray-600 text-sm">Monitoriza entornos y automatiza protocolos para un lugar de trabajo más seguro.</p>
+                            </div>
+                        </li>
+                         <li class="flex items-start bg-white p-4 rounded-lg shadow">
+                            <span class="text-2xl mr-4">💧</span>
+                            <div>
+                                <h4 class="font-semibold">Optimización de Recursos</h4>
+                                <p class="text-gray-600 text-sm">Gestiona de forma inteligente el consumo de energía, agua y otros recursos.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Plataformas y Casos de Éxito -->
+        <section id="plataformas" class="content-section hidden space-y-8">
+             <div class="text-center">
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Plataformas y Casos de Éxito</h2>
+                <p class="mt-4 max-w-3xl mx-auto text-lg text-gray-600">Explore las capacidades de las principales plataformas de IIoT y descubra cómo se aplican en casos de éxito del mundo real. Seleccione una plataforma para ver su descripción general y los proyectos asociados.</p>
+            </div>
+
+            <div class="flex justify-center space-x-2 sm:space-x-4 bg-gray-200 p-2 rounded-full">
+                <button class="platform-tab px-4 py-2 text-sm font-semibold rounded-full transition" data-platform="nodered">Node-RED</button>
+                <button class="platform-tab px-4 py-2 text-sm font-semibold rounded-full transition" data-platform="aws">AWS IoT</button>
+                <button class="platform-tab px-4 py-2 text-sm font-semibold rounded-full transition" data-platform="thingsboard">ThingsBoard</button>
+            </div>
+
+            <div id="platform-content" class="mt-8">
+                <!-- El contenido se generará dinámicamente aquí -->
+            </div>
+        </section>
+
+        <!-- Sección de Análisis Comparativo -->
+        <section id="comparativo" class="content-section hidden space-y-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Análisis Comparativo</h2>
+                <p class="mt-4 max-w-3xl mx-auto text-lg text-gray-600">Esta sección ofrece una comparación directa de Node-RED, AWS IoT y ThingsBoard a través de criterios clave. El objetivo es ayudarle a comprender las fortalezas y debilidades de cada plataforma para seleccionar la herramienta adecuada para diferentes escenarios de IIoT.</p>
+            </div>
+            <div class="overflow-x-auto bg-white rounded-xl shadow-lg p-2">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Criterio</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Node-RED</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">AWS IoT</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ThingsBoard</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <!-- Filas de la tabla se insertarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const appData = {
+            platforms: {
+                nodered: {
+                    name: 'Node-RED',
+                    description: 'Node-RED es una herramienta de programación visual de bajo código, ideal para prototipado rápido y automatización en el borde. Su fortaleza radica en la facilidad de uso y la integración con una amplia gama de protocolos industriales, democratizando el desarrollo de soluciones IIoT.',
+                    cases: [
+                        {
+                            title: 'Fabricación de Precisión (Abrasive Technology)',
+                            problem: 'Automatización compleja, comunicación deficiente con maquinaria y entornos de producción hostiles.',
+                            solution: 'Uso de Node-RED en Raspberry Pi y luego FlowFuse Cloud para construir HMIs rápidamente, automatizar procesos y proteger equipos.',
+                            architecture: 'Despliegue híbrido con Raspberry Pi para HMIs locales y FlowFuse para gestión centralizada. Integración con PLCs y APIs.',
+                            results: 'Aceleración drástica del desarrollo de automatización, permitiendo proyectos antes considerados demasiado complejos. Mejora de la comunicación con la maquinaria.'
+                        },
+                        {
+                            title: 'Sistemas de Riego (PIDD)',
+                            problem: 'Monitorización ineficiente de estaciones remotas, falta de datos en tiempo real y dificultad para atraer talento joven.',
+                            solution: 'Automatización del control de bombas y monitorización con Node-RED y FlowFuse. Uso de ChatGPT para generar flujos.',
+                            architecture: 'Transición de Raspberry Pi a PLCs más robustos (Groov EPIC) por estabilidad. MQTT para supervisión en tiempo real.',
+                            results: 'Reducción de visitas físicas, disminución de la escasez de agua de mensual a anual y éxito en atraer a una fuerza laboral más joven y tecnológica.'
+                        },
+                        {
+                            title: 'SCADA de Código Abierto para Energía Híbrida',
+                            problem: 'Los sistemas SCADA tradicionales eran costosos, complejos y carecían de control activo en tiempo real.',
+                            solution: 'Creación de un sistema SCADA de bajo costo con Node-RED para monitorización, control de generador y detección de fallas.',
+                            architecture: 'Arquitectura distribuida con Arduino y Wio Terminal como RTUs, y Node-RED en un PC como MTU. Uso del protocolo Firmata.',
+                            results: 'Sistema funcional con un costo de hardware de solo CAD $107, control preciso y detección fiable de alertas. Democratización del acceso a la tecnología SCADA.'
+                        }
+                    ]
+                },
+                aws: {
+                    name: 'AWS IoT',
+                    description: 'AWS IoT es una suite de servicios en la nube totalmente gestionados, diseñada para una escalabilidad masiva y una profunda integración con análisis avanzados e IA/ML. Es la opción preferida para grandes empresas que buscan soluciones robustas y predictivas.',
+                    cases: [
+                        {
+                            title: 'Mantenimiento Predictivo en Aeropuertos',
+                            problem: 'Fallas en carruseles de equipaje que causan retrasos y pérdidas millonarias.',
+                            solution: 'Sistema de mantenimiento predictivo usando sensores (vibración, temperatura) y servicios de AWS para anticipar fallas en componentes.',
+                            architecture: 'Sensores IFM -> Gateway CloudRail -> AWS IoT Core -> IoT Analytics para procesar -> SageMaker para predicción -> API Gateway para acciones automáticas.',
+                            results: 'Detección de anomalías de vibración y temperatura, identificación de fallas en listones y automatización de la adquisición de repuestos, mitigando un riesgo financiero crucial.'
+                        },
+                        {
+                            title: 'Plataforma de Datos Unificada (Siemens Energy)',
+                            problem: 'Datos de fabricación fragmentados y aislados en múltiples fábricas globales, impidiendo análisis estandarizados.',
+                            solution: 'Creación de la "Fábrica Conectada", una plataforma centralizada en AWS para estandarizar la recopilación y análisis de datos.',
+                            architecture: 'AWS IoT SiteWise como núcleo central, SiteWise Edge para conectar equipos heredados, S3 para almacenamiento y Grafana para visualización.',
+                            results: 'Visión holística de las operaciones globales, análisis estandarizados y optimización interorganizacional, rompiendo los silos de datos.'
+                        },
+                        {
+                            title: 'Nube Industrial (Grupo Volkswagen)',
+                            problem: 'Integrar y estandarizar datos de más de 120 fábricas en todo el mundo para transformar la fabricación y logística.',
+                            solution: 'Construcción de la "Nube Industrial de Volkswagen" sobre AWS para conectar máquinas, plantas y sistemas.',
+                            architecture: 'Plataforma basada en la nube que utiliza servicios de AWS IoT como AWS IoT Core y SiteWise para la conectividad y modelado de datos a escala masiva.',
+                            results: 'Proyección de un aumento del 30% en productividad, reducción del 30% en costos de fábrica y ahorros de €1 mil millones en la cadena de suministro.'
+                        }
+                    ]
+                },
+                thingsboard: {
+                    name: 'ThingsBoard',
+                    description: 'ThingsBoard es una plataforma IoT de código abierto que ofrece una solución versátil para la gestión de dispositivos, visualización de datos y procesamiento de reglas. Destaca por su flexibilidad, personalización y capacidad de despliegue tanto en la nube como localmente.',
+                    cases: [
+                        {
+                            title: 'Gestión de Energía Inteligente',
+                            problem: 'Consumo energético ineficiente, falta de control centralizado y procesos manuales propensos a errores.',
+                            solution: 'Solución de monitorización que conecta medidores y sensores para recopilar datos de consumo en tiempo real, procesarlos y automatizar acciones.',
+                            architecture: 'Medidores inteligentes -> Gateway IoT (MQTT, etc.) -> Núcleo de ThingsBoard para gestión y motor de reglas -> Paneles de control y apps móviles.',
+                            results: 'Reducción del consumo, optimización basada en condiciones externas, control centralizado y mejora de la sostenibilidad.'
+                        },
+                        {
+                            title: 'SCADA para Perforación de Petróleo y Gas',
+                            problem: 'Necesidad de control en tiempo real de equipos de perforación, visualización de parámetros críticos y mejora de la seguridad.',
+                            solution: 'Sistema SCADA usando plantillas flexibles de ThingsBoard para automatizar y visualizar las operaciones de perforación.',
+                            architecture: 'Dispositivos (reales o emulados con Modbus) -> ThingsBoard IoT Gateway -> Paneles de control SCADA con símbolos y widgets de alarma.',
+                            results: 'Control preciso de equipos críticos, visualización mejorada para la toma de decisiones y un entorno operativo más seguro.'
+                        },
+                        {
+                            title: 'Monitorización de ESD en Electrónica',
+                            problem: 'La descarga electrostática (ESD) puede dañar componentes sensibles, causando fallas costosas en la fabricación de electrónica.',
+                            solution: 'Uso de ThingsBoard para presentar datos de una solución de hardware de monitorización de ESD a los clientes de forma clara y procesable.',
+                            architecture: 'Sensores de ESD -> Plataforma ThingsBoard para ingesta y procesamiento -> Paneles de control personalizados y sistema de alarmas.',
+                            results: 'La empresa calificó a ThingsBoard como la "mejor herramienta en su clase" para presentar datos de IoT industrial, destacando su flexibilidad y documentación.'
+                        }
+                    ]
+                }
+            },
+            comparison: [
+                {
+                    criterion: 'Caso de Uso Principal',
+                    nodered: 'Prototipado rápido, automatización en el borde, integración de sistemas legados, proyectos de bajo costo.',
+                    aws: 'Aplicaciones empresariales a gran escala, mantenimiento predictivo, análisis avanzado y soluciones basadas en IA/ML.',
+                    thingsboard: 'Gestión de dispositivos, visualización de datos, SCADA, soluciones personalizables con control de infraestructura.'
+                },
+                {
+                    criterion: 'Modelo de Despliegue',
+                    nodered: 'Muy flexible: Borde (Raspberry Pi, PLC), local (servidor) o nube.',
+                    aws: 'Principalmente en la nube (Cloud-native), con componentes de borde (Greengrass, SiteWise Edge).',
+                    thingsboard: 'Flexible: Nube (SaaS) o local (On-premises), incluyendo clústeres de Kubernetes.'
+                },
+                {
+                    criterion: 'Curva de Aprendizaje',
+                    nodered: 'Baja. Su interfaz visual es accesible para no desarrolladores.',
+                    aws: 'Media a Alta. Requiere conocimiento del ecosistema de servicios de AWS.',
+                    thingsboard: 'Media. Potente pero requiere configuración de entidades, reglas y paneles.'
+                },
+                {
+                    criterion: 'Escalabilidad',
+                    nodered: 'Limitada de forma nativa. Requiere plataformas como FlowFuse para gestión a escala.',
+                    aws: 'Masivamente escalable. Diseñada para millones de dispositivos y flujos de datos enormes.',
+                    thingsboard: 'Alta. Diseñada para escalabilidad horizontal con arquitectura de microservicios.'
+                },
+                {
+                    criterion: 'Modelo de Costo',
+                    nodered: 'Código abierto (gratuito). Los costos provienen del hardware y plataformas de gestión opcionales.',
+                    aws: 'Pago por uso. Los costos dependen de los servicios consumidos (mensajes, cómputo, almacenamiento).',
+                    thingsboard: 'Código abierto (Community Edition gratuita) y versiones comerciales (Professional Edition con suscripción).'
+                }
+            ]
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            const platformTabs = document.querySelectorAll('.platform-tab');
+            const platformContentContainer = document.getElementById('platform-content');
+            const comparisonTableBody = document.querySelector('#comparativo tbody');
+
+            function showSection(targetId) {
+                contentSections.forEach(section => {
+                    section.classList.toggle('hidden', section.id !== targetId);
+                });
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.hash === `#${targetId}`);
+                });
+            }
+
+            function renderPlatformContent(platformKey) {
+                const platform = appData.platforms[platformKey];
+                if (!platform) return;
+
+                let contentHTML = `
+                    <div class="bg-white p-6 rounded-xl shadow-lg mb-8">
+                        <h3 class="text-2xl font-bold text-gray-800">${platform.name}</h3>
+                        <p class="mt-2 text-gray-600">${platform.description}</p>
+                    </div>
+                    <h4 class="text-xl font-semibold text-center mb-6 text-gray-700">Casos de Éxito Relevantes</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                `;
+
+                platform.cases.forEach((caseItem, index) => {
+                    contentHTML += `
+                        <div class="case-card bg-white rounded-xl shadow-md overflow-hidden" data-case-index="${index}">
+                            <div class="p-6">
+                                <h5 class="font-semibold text-lg text-gray-800">${caseItem.title}</h5>
+                                <p class="text-sm text-gray-500 mt-1">Problema: ${caseItem.problem.substring(0, 70)}...</p>
+                                <div class="text-right mt-4">
+                                    <span class="text-blue-500 text-sm font-medium">Ver detalles ▼</span>
+                                </div>
+                            </div>
+                            <div class="details-content bg-gray-50 px-6">
+                                <div class="py-4 border-t border-gray-200">
+                                    <h6 class="font-semibold text-gray-700">Solución:</h6>
+                                    <p class="text-sm text-gray-600 mt-1">${caseItem.solution}</p>
+                                    <h6 class="font-semibold text-gray-700 mt-4">Arquitectura:</h6>
+                                    <p class="text-sm text-gray-600 mt-1">${caseItem.architecture}</p>
+                                    <h6 class="font-semibold text-gray-700 mt-4">Resultados Clave:</h6>
+                                    <p class="text-sm text-gray-600 mt-1">${caseItem.results}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                contentHTML += `</div>`;
+                platformContentContainer.innerHTML = contentHTML;
+                
+                document.querySelectorAll('.case-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        card.querySelector('.details-content').classList.toggle('open');
+                    });
+                });
+            }
+            
+            function renderComparisonTable() {
+                let tableHTML = '';
+                appData.comparison.forEach(row => {
+                    tableHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${row.criterion}</td>
+                            <td class="px-6 py-4 whitespace-normal text-sm text-gray-600">${row.nodered}</td>
+                            <td class="px-6 py-4 whitespace-normal text-sm text-gray-600">${row.aws}</td>
+                            <td class="px-6 py-4 whitespace-normal text-sm text-gray-600">${row.thingsboard}</td>
+                        </tr>
+                    `;
+                });
+                comparisonTableBody.innerHTML = tableHTML;
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = e.currentTarget.hash.substring(1);
+                    showSection(targetId);
+                });
+            });
+
+            platformTabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    const platformKey = e.currentTarget.dataset.platform;
+                    platformTabs.forEach(t => t.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                    renderPlatformContent(platformKey);
+                });
+            });
+
+            // Initial state
+            const initialHash = window.location.hash ? window.location.hash.substring(1) : 'introduccion';
+            showSection(initialHash);
+            platformTabs[0].classList.add('active');
+            renderPlatformContent('nodered');
+            renderComparisonTable();
+
+            // Chart.js implementation
+            const ctx = document.getElementById('marketGrowthChart').getContext('2d');
+            const marketGrowthChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['2025', '2026', '2027', '2028', '2029'],
+                    datasets: [{
+                        label: 'Volumen de Mercado (en miles de millones de USD)',
+                        data: [250.00, 283.35, 321.14, 363.95, 454.89], // Data calculated with 13.34% CAGR from a base
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    return '$' + value.toFixed(2) + 'B';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y) + 'B';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
